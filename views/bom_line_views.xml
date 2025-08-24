@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_dessert_bom_line_tree" model="ir.ui.view">
+            <field name="name">dessert.bom.line.tree</field>
+            <field name="model">dessert.bom.line</field>
+            <field name="priority">1</field>
+            <field name="arch" type="xml">
+                <tree string="Insumos" editable="bottom">
+                    <!-- Si product_id apunta a product.product o product.template, usa detailed_type -->
+                    <field name="product_id"
+                           domain="[('purchase_ok','=',True),('detailed_type','=','product')]"
+                           options="{'no_create': True}"/>
+                    <field name="quantity"/>
+                    <field name="uom_id" readonly="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_dessert_bom_line_form" model="ir.ui.view">
+            <field name="name">dessert.bom.line.form</field>
+            <field name="model">dessert.bom.line</field>
+            <field name="priority">1</field>
+            <field name="arch" type="xml">
+                <form string="Insumo">
+                    <sheet>
+                        <group>
+                            <field name="product_id"
+                                   domain="[('purchase_ok','=',True),('detailed_type','=','product')]"/>
+                            <field name="quantity"/>
+                            <field name="uom_id" readonly="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

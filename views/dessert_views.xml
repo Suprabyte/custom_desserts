@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_dessert_form" model="ir.ui.view">
+            <field name="name">dessert.dessert.form</field>
+            <field name="model">dessert.dessert</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Postre">
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only"/>
+                            <h1><field name="name" placeholder="Nombre del postre..."/></h1>
+                        </div>
+                        
+                        <group>
+                            <group>
+                                <field name="dessert_type" widget="radio"/>
+                                <field name="product_id" options="{'no_create': True, 'no_edit': True}"/>
+                            </group>
+                        </group>
+                        
+                        <notebook>
+                            <page string="Lista de Materiales" name="bom_lines">
+                                <field name="bom_line_ids" context="{'default_dessert_id': id}"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_dessert_tree" model="ir.ui.view">
+            <field name="name">dessert.dessert.tree</field>
+            <field name="model">dessert.dessert</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Postres">
+                    <field name="name"/>
+                    <field name="dessert_type"/>
+                    <field name="product_id" optional="show"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_dessert_search" model="ir.ui.view">
+            <field name="name">dessert.dessert.search</field>
+            <field name="model">dessert.dessert</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name" string="Postre" filter_domain="[('name', 'ilike', self)]"/>
+                    <field name="product_id" string="Producto"/>
+                    <separator/>
+                    <filter name="finished" string="Terminados" domain="[('dessert_type', '=', 'finished')]"/>
+                    <filter name="intermediate" string="Intermedios" domain="[('dessert_type', '=', 'intermediate')]"/>
+                    <separator/>
+                    <group expand="0" string="Agrupar por">
+                        <filter name="group_type" string="Tipo" context="{'group_by': 'dessert_type'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="view_production_order_form" model="ir.ui.view">
+            <field name="name">dessert.production.order.form</field>
+            <field name="model">dessert.production.order</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Orden de Producción">
+                    <header>
+                        <button name="action_confirm" 
+                                string="Confirmar" 
+                                type="object" 
+                                class="btn-primary" 
+                                invisible="state != 'draft'"/>
+                        <button name="action_start_production" 
+                                string="Iniciar Producción" 
+                                type="object" 
+                                class="btn-success" 
+                                invisible="state != 'confirmed'"/>
+                        <button name="action_mark_done" 
+                                string="Marcar como Terminado" 
+                                type="object" 
+                                class="btn-primary" 
+                                invisible="state != 'in_progress'"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,in_progress,done"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only"/>
+                            <h1><field name="name" readonly="1"/></h1>
+                        </div>
+                        
+                        <group>
+                            <group>
+                                <field name="dessert_id" 
+                                       readonly="state != 'draft'"
+                                       options="{'no_create': True}"/>
+                                <field name="quantity_to_produce" 
+                                       readonly="state != 'draft'"/>
+                                <field name="production_date" 
+                                       readonly="state in ['done', 'cancel']"/>
+                            </group>
+                            <group>
+                                <field name="lot_id" 
+                                       readonly="1" 
+                                       invisible="not lot_id"/>
+                                <field name="expiration_date" 
+                                       readonly="state in ['done', 'cancel']"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_production_order_tree" model="ir.ui.view">
+            <field name="name">dessert.production.order.tree</field>
+            <field name="model">dessert.production.order</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Órdenes de Producción">
+                    <field name="name"/>
+                    <field name="dessert_id"/>
+                    <field name="quantity_to_produce" sum="Total a Producir"/>
+                    <field name="production_date"/>
+                    <field name="expiration_date" optional="hide"/>
+                    <field name="lot_id" optional="hide"/>
+                    <field name="state" widget="badge"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_production_order_kanban" model="ir.ui.view">
+            <field name="name">dessert.production.order.kanban</field>
+            <field name="model">dessert.production.order</field>
+            <field name="type">kanban</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="state" class="o_kanban_small_column">
+                    <field name="name"/>
+                    <field name="dessert_id"/>
+                    <field name="quantity_to_produce"/>
+                    <field name="production_date"/>
+                    <field name="state"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_card oe_kanban_global_click">
+                                <div class="oe_kanban_content">
+                                    <div class="o_kanban_record_title">
+                                        <strong><field name="name"/></strong>
+                                    </div>
+                                    <div class="o_kanban_record_subtitle">
+                                        <field name="dessert_id"/>
+                                    </div>
+                                    <div class="o_kanban_record_bottom">
+                                        <div class="oe_kanban_bottom_left">
+                                            <span>Cantidad: <field name="quantity_to_produce"/></span>
+                                        </div>
+                                        <div class="oe_kanban_bottom_right">
+                                            <field name="production_date" widget="date"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="action_dessert" model="ir.actions.act_window">
+            <field name="name">Postres</field>
+            <field name="res_model">dessert.dessert</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_dessert_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    ¡Crea tu primer postre!
+                </p>
+                <p>
+                    Define tus postres y configura los insumos necesarios para su producción.
+                </p>
+            </field>
+        </record>
+
+        <record id="action_production_order" model="ir.actions.act_window">
+            <field name="name">Órdenes de Producción</field>
+            <field name="res_model">dessert.production.order</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    ¡Crea tu primera orden de producción!
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_desserts_root" 
+                  name="Gestión de Postres" 
+                  sequence="100"/>
+        
+        <menuitem id="menu_desserts_master_data" 
+                  name="Configuración" 
+                  parent="menu_desserts_root" 
+                  sequence="10"/>
+        
+        <menuitem id="menu_desserts" 
+                  name="Postres" 
+                  parent="menu_desserts_master_data" 
+                  action="action_dessert" 
+                  sequence="10"/>
+        
+        <menuitem id="menu_production" 
+                  name="Producción" 
+                  parent="menu_desserts_root" 
+                  sequence="20"/>
+        
+        <menuitem id="menu_production_orders" 
+                  name="Órdenes de Producción" 
+                  parent="menu_production" 
+                  action="action_production_order" 
+                  sequence="10"/>
+
+    </data>
+</odoo>

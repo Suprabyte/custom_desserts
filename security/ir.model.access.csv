@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_dessert_dessert_user,dessert.dessert.user,model_dessert_dessert,,1,1,1,1
+access_dessert_bom_line_user,dessert.bom.line.user,model_dessert_bom_line,,1,1,1,1
+access_dessert_production_order_user,dessert.production.order.user,model_dessert_production_order,,1,1,1,1
