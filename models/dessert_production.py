@@ -23,9 +23,18 @@ class DessertBomLine(models.Model):
     _name = 'dessert.bom.line'
     _description = 'Línea de Insumos para Postre'
 
-    dessert_id = fields.Many2one('dessert.dessert', string='Postre', required=True, ondelete='cascade')
-    product_id = fields.Many2one('product.product', string='Insumo', required=True,
-                                 domain="[('type', '=', 'product')]")
+    dessert_id = fields.Many2one(
+        'dessert.dessert',
+        string='Postre',
+        required=True,
+        ondelete='cascade'
+    )
+    product_id = fields.Many2one(
+        'product.product',
+        string='Insumo',
+        required=True,
+        domain="[('purchase_ok','=',True),('detailed_type','=','product')]"
+    )
     quantity = fields.Float('Cantidad', required=True, default=1.0)
     uom_id = fields.Many2one('uom.uom', string='Unidad de Medida', related='product_id.uom_id', readonly=True)
 
@@ -88,6 +97,7 @@ class ProductionOrder(models.Model):
             order.state = 'in_progress'
         return True
 
+
     def action_mark_done(self):
         for order in self:
             if not order.dessert_id.product_id:
@@ -98,8 +108,8 @@ class ProductionOrder(models.Model):
                 'name': self.env['ir.sequence'].next_by_code('stock.lot.serial') or order.name,
                 'product_id': order.dessert_id.product_id.id,
                 'company_id': self.env.company.id,
-                'expiration_date': order.expiration_date
+                'expiration_date': order.expiration_date,
             })
-            order.lot_id = lot.id
+            order.lot_id = lot
             order.state = 'done'
         return True
